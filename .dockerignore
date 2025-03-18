@@ -1,0 +1,42 @@
+# Binaries and build artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+
+# Test files
+*.test
+*.out
+
+# Go specific
+vendor/
+go.work
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment and local config
+.env
+.env.local
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Docker specific
+*_data/
+Dockerfile
+docker-compose.yml
+
+# Git related
+.git/
+.gitignore
+
+# Project specific temporary files
+tmp/
+temp/

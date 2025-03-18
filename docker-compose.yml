@@ -1,0 +1,14 @@
+services:
+  noter_db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: noter
+    ports:
+      - 5432:5432
+    volumes:
+      - noter_db_data:/var/lib/postgresql/data
+
+volumes:
+  noter_db_data:
