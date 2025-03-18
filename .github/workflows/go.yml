@@ -1,0 +1,24 @@
+name: Go Build & Test
+description: Build and test the Go application
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.24
+
+      - name: Build Go Application
+        run: go build -o bin/api cmd/api/main.go
+
+      - name: Run Tests
+        run: go test -v ./...
