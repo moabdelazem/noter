@@ -27,6 +27,19 @@ test:
 	@go test -v ./...
 	echo "Tests completed successfully"
 
+# Run the endpoint tests only
+test-endpoints:
+	echo "Running endpoint tests..."
+	@go test -v ./tests/...
+	echo "Endpoint tests completed successfully"
+
+# Run tests with coverage
+test-coverage:
+	echo "Running tests with coverage..."
+	@go test -coverprofile=coverage.out -v ./...
+	@go tool cover -html=coverage.out
+	echo "Coverage tests completed successfully"
+
 # Create a new migration file
 migrate-create:
 	@read -p "Enter migration name: " name; \
