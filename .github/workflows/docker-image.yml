@@ -16,6 +16,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Build Docker Image
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: build the docker image
         run: docker build -t moabdelazem/noter:latest .
+
+      - name: push the image to docker hub
+        run: |
+          docker login -u moabdelazem -p ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+          docker push moabdelazem/noter:latest
