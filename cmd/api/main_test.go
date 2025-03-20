@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/moabdelazem/noter/internal/handlers"
+	"github.com/moabdelazem/noter/internal/middleware"
 )
 
 func TestHealthCheckHandler(t *testing.T) {
@@ -19,7 +21,7 @@ func TestHealthCheckHandler(t *testing.T) {
 
 	// Create a ResponseRecorder to record the response
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(handleHealthCheck)
+	handler := http.HandlerFunc(handlers.HealthHandler)
 
 	// Call the handler directly and pass in our request and response recorder
 	handler.ServeHTTP(rr, req)
@@ -59,8 +61,8 @@ func TestHealthCheckHandler(t *testing.T) {
 func TestRouter(t *testing.T) {
 	// Create a new router with the middleware
 	router := mux.NewRouter()
-	router.Use(LoggerMiddleware)
-	router.HandleFunc("/health", handleHealthCheck)
+	router.Use(middleware.Logger)
+	router.HandleFunc("/health", handlers.HealthHandler)
 
 	// Create a test server
 	server := httptest.NewServer(router)
