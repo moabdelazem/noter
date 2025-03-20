@@ -1,3 +1,5 @@
+include .env
+
 # Build the application and save it to bin/api
 build:
 	echo "Building the application..."
@@ -25,6 +27,26 @@ test:
 	@go test -v ./...
 	echo "Tests completed successfully"
 
+# Create a new migration file
+migrate-create:
+	@read -p "Enter migration name: " name; \
+	migrate create -ext sql -dir migrations -seq $$name
+
+# Run migrations up
+migrate-up:
+	migrate -path migrations -database "postgres://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=$(DB_SSLMODE)" up
+
+# Run migrations down
+migrate-down:
+	migrate -path migrations -database "postgres://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=$(DB_SSLMODE)" down
+
+# Start the database
+db-start:
+	docker-compose up -d noter_db
+
+# Stop the database
+db-stop:
+	docker-compose down
 
 # Docker Build
 docker-build:
@@ -42,3 +64,10 @@ docker-push:
 docker-pull:
 	docker pull moabdelazem/noter
 
+# Environment variables for database
+DB_HOST ?= localhost
+DB_PORT ?= 5432
+DB_USER ?= postgres
+DB_PASSWORD ?= postgres
+DB_NAME ?= noter
+DB_SSLMODE ?= disable

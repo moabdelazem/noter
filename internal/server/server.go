@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -11,12 +12,14 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/moabdelazem/noter/internal/config"
+	"github.com/moabdelazem/noter/internal/database"
 	"github.com/moabdelazem/noter/internal/routes"
 )
 
 type Server struct {
 	router *mux.Router
 	config *config.Config
+	db     *database.DB
 }
 
 func New(cfg *config.Config) *Server {
@@ -31,7 +34,35 @@ func New(cfg *config.Config) *Server {
 	}
 }
 
+// InitDB initializes the database connection
+func (s *Server) InitDB() error {
+	// Initialize database connection
+	db, err := database.New(s.config)
+	if err != nil {
+		return fmt.Errorf("error initializing database: %w", err)
+	}
+	s.db = db
+
+	// Run migrations
+	if err := database.RunMigrations(s.config); err != nil {
+		return fmt.Errorf("error running migrations: %w", err)
+	}
+
+	// Setup database-specific routes
+	routes.SetupDBRoutes(s.router, s.db)
+
+	return nil
+}
+
 func (s *Server) Start() error {
+	// Initialize database connection
+	if err := s.InitDB(); err != nil {
+		return err
+	}
+	// Ensure we close the database connection when the server shuts down
+	defer s.db.Close()
+
+	// Create HTTP server
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%s", s.config.ServerPort),
 		Handler: s.router,
@@ -47,6 +78,8 @@ func (s *Server) Start() error {
 		// Block until a signal is received
 		<-quitChan
 
+		log.Println("Shutting down server...")
+
 		// Create a context with 5 second timeout for graceful shutdown
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		// Ensure the cancel function is called to release resources
@@ -55,10 +88,10 @@ func (s *Server) Start() error {
 		// Attempt to gracefully shutdown the server
 		if err := server.Shutdown(ctx); err != nil {
 			// Log error if shutdown fails and server is forced to stop
-			fmt.Printf("Server forced to shutdown: %v\n", err)
+			log.Printf("Server forced to shutdown: %v\n", err)
 		}
 	}()
 
-	fmt.Printf("Starting the server at port %s\n", s.config.ServerPort)
+	log.Printf("Starting the server at port %s\n", s.config.ServerPort)
 	return server.ListenAndServe()
 }
